@@ -1,6 +1,6 @@
 package com.personal.infostore.model;
 
-public enum Type {
+public enum MeasurementType {
     TEMP,
     VOLT,
     WATT

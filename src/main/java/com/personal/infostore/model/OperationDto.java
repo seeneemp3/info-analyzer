@@ -10,9 +10,9 @@ import java.util.Map;
 @Getter
 @Setter
 @ToString
-public class SummaryDto {
+public class OperationDto {
     private long sensorId;
-    private Map<Type, List<Summary.SummaryEntry>> values;
+    private Map<MeasurementType, List<Operation.OperationEntry>> values;
 
 }
 
