@@ -1,6 +1,6 @@
 package com.personal.infostore.config;
 
-import com.personal.infostore.model.OperationType;
+import com.personal.infostore.model.MeasurementType;
 
 public class RedisSchema {
 
@@ -8,9 +8,9 @@ public class RedisSchema {
         return KeyHelper.getKey("sensors");
     }
 
-    public static String operationKey(
+    public static String summaryKey(
             long sensorId,
-            OperationType type
+            MeasurementType type
     ) {
         return KeyHelper.getKey("sensors:" + sensorId + ":" + type.name().toLowerCase());
     }

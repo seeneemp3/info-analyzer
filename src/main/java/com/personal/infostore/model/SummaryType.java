@@ -1,6 +1,6 @@
 package com.personal.infostore.model;
 
-public enum OperationType {
+public enum SummaryType {
 
     SUM,
     AVG,
