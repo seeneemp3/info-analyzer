@@ -46,12 +46,13 @@ public class SummaryRepositoryImpl implements SummaryRepository {
         summary.setSensorId(sensorId);
         for (MeasurementType mType : mTypes) {
             for (SummaryType sType : sTypes) {
-                Summary.SummaryEntry entry = new Summary.SummaryEntry();
+                var entry = new Summary.SummaryEntry();
                 entry.setType(sType);
                 String value = jedis.hget(RedisSchema.summaryKey(sensorId, mType), sType.name().toLowerCase());
                 if (value != null) {
                     entry.setValue(Double.parseDouble(value));
                 }
+                summary.addValue(mType, entry);
             }
         }
         return Optional.of(summary);

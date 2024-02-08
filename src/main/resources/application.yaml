@@ -6,4 +6,4 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 server:
-  port:8083
+  port: 8083

@@ -17,10 +17,10 @@ public class SummaryServiceImpl implements SummaryService {
     private final SummaryRepository repository;
 
     @Override
-    public Summary get(long sensorId, Set<MeasurementType> types, Set<SummaryType> summaryTypes) {
+    public Summary get(long sensorId, Set<MeasurementType> mTypes, Set<SummaryType> sTypes) {
         return repository.findBySensorId(sensorId,
-                        types == null ? Set.of(MeasurementType.values()) : types,
-                        summaryTypes == null ? Set.of(SummaryType.values()) : summaryTypes)
+                        mTypes == null ? Set.of(MeasurementType.values()) : mTypes,
+                        sTypes == null ? Set.of(SummaryType.values()) : sTypes)
                 .orElseThrow(SensorNFE::new);
     }
 }

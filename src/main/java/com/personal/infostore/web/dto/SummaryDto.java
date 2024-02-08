@@ -1,5 +1,7 @@
-package com.personal.infostore.model;
+package com.personal.infostore.web.dto;
 
+import com.personal.infostore.model.MeasurementType;
+import com.personal.infostore.model.Summary;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

@@ -8,11 +8,8 @@ public class RedisSchema {
         return KeyHelper.getKey("sensors");
     }
 
-    public static String summaryKey(
-            long sensorId,
-            MeasurementType type
-    ) {
-        return KeyHelper.getKey("sensors:" + sensorId + ":" + type.name().toLowerCase());
+    public static String summaryKey(long sensorId, MeasurementType mType) {
+        return KeyHelper.getKey("sensors:" + sensorId + ":" + mType.name().toLowerCase());
     }
 
 }
