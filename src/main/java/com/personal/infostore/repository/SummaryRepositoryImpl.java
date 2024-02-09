@@ -1,6 +1,7 @@
 package com.personal.infostore.repository;
 
 import com.personal.infostore.config.RedisSchema;
+import com.personal.infostore.model.Data;
 import com.personal.infostore.model.MeasurementType;
 import com.personal.infostore.model.Summary;
 import com.personal.infostore.model.SummaryType;
@@ -38,6 +39,92 @@ public class SummaryRepositoryImpl implements SummaryRepository {
         }
     }
 
+    @Override
+    public void handle(Data data) {
+        try (Jedis jedis = jedisPool.getResource()) {
+            if (!jedis.sismember(RedisSchema.sensorKeys(), String.valueOf(data.getSensorId()))) {
+                jedis.sadd(RedisSchema.sensorKeys(), String.valueOf(data.getSensorId()));
+            }
+            updateMinValue(data, jedis);
+            updateMaxValue(data, jedis);
+            updateSumAndAvgValue(data, jedis);
+        }
+    }
+
+    private void updateSumAndAvgValue(Data data, Jedis jedis) {
+        updateSumValue(data, jedis);
+        String key = RedisSchema.summaryKey(data.getSensorId(), data.getMeasurementType());
+        String counter = jedis.hget(key, "counter");
+        if (counter == null) {
+            counter = String.valueOf(
+                    jedis.hset(
+                            key,
+                            "counter",
+                            String.valueOf(1)
+                    )
+            );
+        } else {
+            counter = String.valueOf(
+                    jedis.hincrBy(
+                            key,
+                            "counter",
+                            1
+                    )
+            );
+        }
+        String sum = jedis.hget(key, SummaryType.SUM.name().toLowerCase());
+        jedis.hset(
+                key,
+                SummaryType.AVG.name().toLowerCase(),
+                String.valueOf(
+                        Double.parseDouble(sum) / Double.parseDouble(counter)
+                )
+        );
+    }
+
+    private void updateSumValue(Data data, Jedis jedis) {
+        String key = RedisSchema.summaryKey(data.getSensorId(), data.getMeasurementType());
+        String value = jedis.hget(key, SummaryType.SUM.name().toLowerCase());
+        if (value == null) {
+            jedis.hset(
+                    key,
+                    SummaryType.SUM.name().toLowerCase(),
+                    String.valueOf(data.getMeasurement())
+            );
+        } else {
+            jedis.hincrByFloat(
+                    key,
+                    SummaryType.SUM.name().toLowerCase(),
+                    data.getMeasurement()
+            );
+        }
+    }
+
+
+    private void updateMaxValue(Data data, Jedis jedis) {
+        String key = RedisSchema.summaryKey(data.getSensorId(), data.getMeasurementType());
+        String value = jedis.hget(key, SummaryType.MAX.name().toLowerCase());
+        if (value == null || data.getMeasurement() > Double.parseDouble(value)) {
+            jedis.hset(
+                    key,
+                    SummaryType.MAX.name().toLowerCase(),
+                    String.valueOf(data.getMeasurement())
+            );
+        }
+    }
+
+    private void updateMinValue(Data data, Jedis jedis) {
+        String key = RedisSchema.summaryKey(data.getSensorId(), data.getMeasurementType());
+        String value = jedis.hget(key, SummaryType.MIN.name().toLowerCase());
+        if (value == null || data.getMeasurement() < Double.parseDouble(value)) {
+            jedis.hset(
+                    key,
+                    SummaryType.MIN.name().toLowerCase(),
+                    String.valueOf(data.getMeasurement())
+            );
+        }
+    }
+
     private Optional<Summary> getSummary(long sensorId,
                                          Set<MeasurementType> mTypes,
                                          Set<SummaryType> sTypes,
@@ -51,6 +138,10 @@ public class SummaryRepositoryImpl implements SummaryRepository {
                 String value = jedis.hget(RedisSchema.summaryKey(sensorId, mType), sType.name().toLowerCase());
                 if (value != null) {
                     entry.setValue(Double.parseDouble(value));
+                }
+                String counter = jedis.hget(RedisSchema.summaryKey(sensorId, mType), "counter");
+                if (counter != null) {
+                    entry.setCounter(Long.parseLong(counter));
                 }
                 summary.addValue(mType, entry);
             }

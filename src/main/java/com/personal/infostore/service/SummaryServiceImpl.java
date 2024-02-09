@@ -1,5 +1,6 @@
 package com.personal.infostore.service;
 
+import com.personal.infostore.model.Data;
 import com.personal.infostore.model.MeasurementType;
 import com.personal.infostore.model.Summary;
 import com.personal.infostore.model.SummaryType;
@@ -22,5 +23,10 @@ public class SummaryServiceImpl implements SummaryService {
                         mTypes == null ? Set.of(MeasurementType.values()) : mTypes,
                         sTypes == null ? Set.of(SummaryType.values()) : sTypes)
                 .orElseThrow(SensorNFE::new);
+    }
+
+    @Override
+    public void handle(Data data) {
+        repository.handle(data);
     }
 }
